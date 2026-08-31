@@ -1,0 +1,346 @@
+% \iffalse meta-comment
+%
+% hit-table.dtx 是各个类共用的表格层
+%
+% \fi
+%
+% \section{共享表格层}
+%
+% \changes{v3.2a}{2026/08/07}{长表格的字号机制抽出来给各个类共用}
+% \pkg{longtable} 不是浮动体，不会跟着 \cs{caption} 自动调字号，得自己把默认字号
+% 压到五号。这套机制原来只在学位论文类里，而 \env{eqdenote} 各个类
+% 都有、里面又要用 \cs{ltfontsize} 把字号调回正文大小，报告类用
+% \env{eqdenote} 会报 \cs{ltfontsize} 未定义。
+%
+% 位置与 \file{hit-fonts.dtx}、\file{hit-math.dtx} 一样，排在类自己的 dtx 之前，
+% 所以只放定义，改 \cs{LT@array} 的部分放进 \cs{hit@setup@table}，由各个类在
+% \pkg{longtable} 加载之后调用。
+%
+%    \begin{macrocode}
+%<*shared-table>
+%    \end{macrocode}
+%
+% \begin{macro}{\hit@setup@table}
+% \changes{v3.2a}{2026/08/21}{改到 \texttt{begindocument} 才包。原先在宏包加载
+%   期就换掉 \cs{LT@array}，一是被后加载的 \pkg{caption} 整个重定义掉、补丁其实
+%   一直没生效，二是旧版 \pkg{hyperref} 给 \cs{LT@array} 打补丁时按原参数文本
+%   匹配，撞上我们的包装会报错并把组留在栈上}
+% 存一份原来的 \cs{LT@array}，再把默认字号换成五号。
+%
+% \emph{要等所有宏包都打完补丁。} \pkg{longtable} 的 \cs{LT@array} 是好几个宏包
+% 抢着改的地方：\pkg{caption} 换成自己的 \cs{caption@LT@array}，\pkg{hyperref}
+% 也插一手。在加载期包，后面谁再重定义一次就把我们的包装冲掉了——TL2022 与
+% TL2026 上实测都是 \texttt{caption@LT@array}，也就是这个五号一直没排上。更糟的是
+% 旧版 \pkg{hyperref} 打这个补丁时按原来的参数文本匹配，看到我们的包装会报
+% \texttt{Use of \string\x doesn't match its definition}，出错时手里的组关不掉，
+% 类加载完组深从 1 变成 6，报告类的宏级测试整批报差（在 TL2022 容器里复现）。
+%
+% 挪到 \texttt{begindocument/end}：\pkg{caption} 自己也是在 \texttt{begindocument}
+% 里换 \cs{LT@array} 的，挂在同一个钩子上会被它接着冲掉（实测），要挂到
+% 所有 \cs{AtBeginDocument} 之后那一档。
+%    \begin{macrocode}
+\bool_new:N \l__hit_table_float_bool
+\cs_new_protected:Npn \hit@setup@table
+  {
+    \AddToHook { begindocument / end }
+      {
+        \cs_set_eq:NN \hit@original@longtable@array \LT@array
+        \cs_set:Npn \LT@array { \hit@table@font: \hit@original@longtable@array }
+      }
+    \AddToHook { env/table/begin }  { \bool_set_true:N \l__hit_table_float_bool }
+    \AddToHook { env/table*/begin } { \bool_set_true:N \l__hit_table_float_bool }
+    \clist_map_inline:nn { tabular , tabular* , tabularx , tabulary , array }
+      {
+        \AddToHook { env/##1/begin }
+          { \bool_if:NT \l__hit_table_float_bool { \hit@table@font: } }
+      }
+    \hit@setup@tabularray
+  }
+%    \end{macrocode}
+%
+% \changes{v3.2a}{2026/08/29}{\env{table} 浮动体里的默认字号也压到五号。规范写着
+%   「表中文字用宋体 5 号字」，从前只有长表格照办，普通表格要用户自己写
+%   \cs{wuhao}}
+% \textbf{\env{table} 浮动体里也是五号。} 规范原话是「表中文字用宋体~5~号字」，
+% 与长表格那一条是同一句。从前只有 \pkg{longtable} 走了这一条，普通表格得用户
+% 自己在 \cs{begin}\marg{tabular} 前面写一句 \cs{wuhao}——示例文档里每张表都写着，
+% 正是模型缺了一块的样子。
+%
+% \emph{两级钩子。} 字号不能直接挂在 \env{table} 上：\cs{@xfloat} 起浮动体时
+% 要走一遍 \cs{@floatboxreset}，那里头有 \cs{normalsize}，挂在 \env{table} 上的
+% 设置当场就被冲掉（实测表内文字仍是小四）。也不能直接挂在 \env{tabular} 上：
+% \env{tabular} 类里到处在用（封面的字段表、内封、\env{eqdenote}），那些地方各有
+% 各的字号，挂上去会一并盖掉。
+%
+% 所以 \env{table} 那一层只立一个标志，\env{tabular} 一族那一层看标志再设字号。
+% 标志是局部的，浮动体一收组自己就没了。题注不受影响，\cs{@makecaption} 自己
+% 按 \option{caption-table} 再设一遍。
+%
+% \env{figure} 那一头不挂。规范同样说「图中文字用宋体~5~号字」，可图里的字多半
+% 在图片里头，排版这边够不着；\pkg{tikz} 画的那种要自己写字号。
+% \end{macro}
+%
+% \changes{v3.2a}{2026/08/29}{新版面下长表格的行距取网格行距。原先是 \cs{wuhao}
+%   自带的 1.3 倍，行高 13.65\,bp，比 Word 的一格矮了三分之一}
+% \begin{macro}{\hit@table@font:}
+% \textbf{行高就是网格行距。} Word 里表格数据行的行高等于文档网格的行距，行盒在行里
+% 垂直居中。实测本科范例第 12 页那张表：表头下 387.12、底线 521.40，七行，
+% 一行 $(521.40-387.12)/7 = 19.18$；那一节的 \texttt{docGrid} 写的是
+% \texttt{linePitch=383}，也就是 19.15\,bp。步进与行高都是它。
+%
+% \hologo{LaTeX} 这边表格行高由 \cs{@arstrutbox} 定，而它是按 \cs{strutbox} 的
+% 0.7／0.3 分的，\cs{strutbox} 又跟着 \cs{baselineskip} 走。所以只要把长表格默认
+% 字号的行距设成网格行距，行高就对了：五号 \cs{wuhao} 自带 1.3 倍是 13.65\,bp，
+% 比一格矮三分之一，手册上教用户写 \cs{ltfontsize}\marg{\cs{wuhao}\oarg{1.667}}
+% 手调的正是这一段。
+%
+% 基线在行里的位置这样也就对上了：\hologo{LaTeX} 放在行顶下 $0.7L = 13.41$\,bp，
+% Word 是「行盒居中再加上升部」，即 $(19.15-13.617)/2 + 10.66 = 13.43$\,bp，
+% 差 0.02\,bp。不必另写居中的撑杆。
+%
+% 旧版面算不出网格（\cs{g\_hit\_msword\_lead\_dim} 是零），退回 \cs{wuhao}。
+% 判据是「网格算出来没有」，不是「哪个版面」——问版面等于把同一件事写两遍。
+%    \begin{macrocode}
+\cs_new_protected:Npn \hit@table@font:
+  {
+    \dim_compare:nNnTF { \g_hit_msword_lead_dim } = { 0pt }
+      { \wuhao }
+      {
+        \fontsize { \dim_use:N \c__hit_font_size_wuhao_dim }
+          { \dim_use:N \g_hit_msword_lead_dim }
+        \selectfont
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\hit@setup@table@rules}
+% \changes{v3.2a}{2026/08/12}{三线表的线宽从 deps 挪到这里。那边只管加载宏包，
+%   线宽是排版取值，归表格这一处}
+% \changes{v3.2a}{2026/08/29}{线宽的单位从 \texttt{pt} 换成 \texttt{bp}，
+%   另按 Word 的单元格边距设 \cs{tabcolsep}}
+% 三线表的线宽与单元格边距。规范里三条线粗细不同，\pkg{booktabs} 的默认值细一档。
+%
+% \textbf{读自范例的 \file{.docx}，不是从 PDF 上量的。} 指南只说「不加左右边线」
+% 「建议采用国际通行的三线表」，一个数都没给。范例那张表的 \texttt{tblPr} 是全框
+% \texttt{sz=4}，三条线由\emph{单元格级}的 \texttt{w:tcBorders} 逐格盖掉：表头行
+% 上 \texttt{sz=12}、下 \texttt{sz=8}，数据首行上 \texttt{sz=8}，末行下
+% \texttt{sz=12}，其余四边全 \texttt{nil}。\texttt{w:sz} 的单位是八分之一磅，
+% \texttt{sz=12} 与 \texttt{sz=8} 就是 Word「边框和底纹」里那个宽度下拉框上的
+% 1½ 磅与 1 磅。
+%
+% \textbf{磅是 \texttt{bp} 不是 \texttt{pt}。} Word 的磅是 1/72 英寸，
+% \hologo{TeX} 的 \texttt{pt} 是 1/72.27 英寸，照 Word 写 \texttt{bp}。两个版面
+% 一套值，不为旧版面另留一支：v3.1e 写的 1.5\,pt 与 1.5\,bp 差 0.0056\,bp，
+% 印不出来，为这点差养一个分支不值。
+%
+% \cs{tabcolsep} 是单元格左右各留多少。范例的表没写 \texttt{tblCellMar}，用的是
+% \file{styles.xml} 里 \texttt{docDefaults} 那一份：上下 0、左右各 108 缇，
+% 也就是 5.4\,bp（Word 的「表格属性→单元格边距」上显示 0.19 厘米）。
+% \hologo{LaTeX} 的默认值是 6\,pt。
+%    \begin{macrocode}
+\cs_new_protected:Npn \hit@setup@table@rules
+  {
+    \dim_set:Nn \heavyrulewidth { 1.5bp }
+    \dim_set:Nn \lightrulewidth { 1bp }
+    \dim_set:Nn \cmidrulewidth { 0.5bp }
+    \dim_set:Nn \tabcolsep { 5.4bp }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\hit@setup@tabularray}
+% \changes{v3.2a}{2026/08/30}{\pkg{tabularray} 接进同一套表格值：线宽、单元格
+%   边距、表内字号行距、表题链与续表头，与老写法共用}
+% \pkg{tabularray} 是推荐的表格写法，接进同一套值，全挂在
+% \texttt{package/tabularray/after} 钩子上——用户不装不欠账，装了就齐。
+% 逐项对应：
+% \begin{itemize}
+% \item \emph{线宽零工作}：它的 \pkg{booktabs} 库
+%   （\cs{UseTblrLibrary}\marg{booktabs}）画三线用的就是
+%   \cs{heavyrulewidth} 这批全局尺寸，上面设过的值直接生效。
+% \item \emph{单元格边距}：它的 \texttt{colsep} 不读 \cs{tabcolsep}（默认
+%   6\,pt），而且每个环境一份 inner 表、互不继承，\pkg{booktabs} 库的那三个
+%   环境在库加载前还不存在。所以挂在各环境自己的 begin 钩子里，进环境时
+%   往它的 inner 表追加 \texttt{colsep=}\cs{tabcolsep}——追加是组内局部的，
+%   出组即还原，不会越积越长。
+% \item \emph{表内字号行距}：\env{tblr} 与 \env{booktabs} 走 \env{tabular}
+%   一族的两级钩子（浮动体里才压五号）；\env{longtblr}、\env{talltblr}、
+%   \env{longtabs}、\env{talltabs} 与 \pkg{longtable} 同规矩，无条件压。
+%   钩子挂在环境名上，环境不存在就永不触发，先挂无害。
+% \item \emph{表题}：题号、题号后的间隔、字体三件各接原链——
+%   \cs{fnum@table}、\cs{hit@caption@separator}、\option{caption-table}
+%   格式目标，与 \cs{caption} 排出来同源。间隔与字体那两条链看
+%   \cs{@captype} 分图表，模板里先立成 \texttt{table}。
+% \item \emph{续表头}：规范说「表右上角注明编号，编号后加“（续表）”，
+%   表题可省略」，demo 的老写法是
+%   \cs{multicolumn}\marg{n}\marg{r}\marg{表~x-x（续表）}。续页头照此排：
+%   编号加“（续表）”靠右，表题省略；英文文档排 (Continued)。续页脚不排，
+%   老写法也没有。
+% \item \emph{双语表题}：给长表环境注册一个 \texttt{caption-en} 外参
+%   （\cs{DeclareTblrKeys} 是它的公开接口），caption 模板排完中文行后接一行
+%   英文——英文表名前缀、表号、题号后的间隔、英文题，逐件与浮动表里
+%   \cs{caption}\marg{中文题}\oarg{英文题} 的第二行同链；排不排听
+%   \option{format}/\option{bilingual-caption} 的，与浮动表同一个开关。
+%   表题的可用宽度顺手从表宽抬成版心宽——\pkg{tabularray} 把 caption 排在
+%   表宽里（头盒的 \cs{hsize} 被它设成表宽），窄表的题被挤着折行，规范
+%   口径是表题居中于版心。抬法：题装进一只 \cs{parbox}\marg{\cs{textwidth}}，
+%   两边 \cs{hss} 夹着塞回表宽的行盒——题相对\emph{表}居中，表按默认的
+%   \texttt{halign=c} 居中于版心时两个中心重合，且不必猜头盒随表块怎么
+%   水平摆放（按块缩进做负位移的写法在两份测试文档里一份准一份不准，
+%   放弃）。不能改 \cs{hsize} 抬，哪怕包在分组里，表体 \texttt{halign=c}
+%   的缩进也跟着算歪、整张表贴到左缘（实测顶线 x0 从 200 掉到 85）。
+%   续表头不抬，右对齐于表右缘是老写法 \cs{multicolumn}\marg{n}\marg{r}
+%   的语义。
+% \item \emph{续表重复表头}：规范说「续表应重复表头」，\env{longtblr} 与
+%   \env{longtabs} 的 \texttt{rowhead} 默认给 1，用户在环境参数里写
+%   \texttt{rowhead=0} 或别的值照常覆盖。
+% \end{itemize}
+% 表题字体那条链在报告类没有（\cs{hit@caption@separator} 一族住在学位论文类
+% 的浮动层），钩子里逐条存在才接，报告类装 \pkg{tabularray} 保它默认样式。
+%
+% \pkg{tabularray} 的接口按特性检测分级：模板与样式那批要
+% \cs{DeclareTblrTemplate}（2022 年的模板系统），老版本探不到就整块不接，
+% 编译照常、只是没有那部分自动化——类必装 \pkg{tabularray}（决议页在用），
+% 钩子每次都触发，不能在老版上炸。\option{caption-en} 外参的注册分两路：
+% 2025 年起走公开的 \cs{DeclareTblrKeys}；2023A 到 2024A 那两代没有它，但
+% outer 键组叫 \texttt{tblr-outer}、\cs{\_\_tblr\_outer\_gput\_spec:nn} 同名，
+% 探到组就直接 \cs{keys\_define:nn} 注册，TL2022 到 2024 的 demo 双语长表
+% 照排。挂环境名的那批（边距、字号、\texttt{rowhead}）天然免疫：环境不
+% 存在钩子永不触发。\pkg{booktabs} 库也在这儿装上，用户什么都不用写。
+%    \begin{macrocode}
+\cs_new_protected:Npn \__hit_table_tblr_captype:
+  { \cs_set:Npn \@captype { table } }
+\box_new:N \l__hit_table_caption_box
+\tl_new:N \l__hit_table_caption_en_tl
+\cs_new_protected:Npn \__hit_table_tblr_en_line:
+  {
+    \tl_set:Nx \l__hit_table_caption_en_tl { \InsertTblrText { caption-en } }
+    \bool_lazy_and:nnT
+      { \bool_if_p:N \g__hit_bilingual_caption_bool }
+      { ! \tl_if_empty_p:N \l__hit_table_caption_en_tl }
+      {
+        \hbox_set:Nn \l__hit_table_caption_box
+          {
+            \__hit_table_tblr_captype:
+            \use:c { hit@term@caption@table@prefix@en } ~ \thetable
+            \hit@caption@separator
+            \l__hit_table_caption_en_tl
+          }
+        \dim_compare:nNnTF { \box_wd:N \l__hit_table_caption_box } > { \hsize }
+          { \noindent \hbox_unpack:N \l__hit_table_caption_box \par }
+          {
+            \centering
+            \makebox [ \hsize ] [ c ] { \box_use:N \l__hit_table_caption_box }
+            \par
+          }
+      }
+  }
+\cs_new_protected:Npn \hit@setup@tabularray
+  {
+    \AddToHook { package / tabularray / after }
+      {
+        \UseTblrLibrary { booktabs }
+        \clist_map_inline:nn { tblr , booktabs }
+          {
+            \AddToHook { env/##1/begin }
+              {
+                \SetTblrInner [##1] { colsep = \tabcolsep }
+                \bool_if:NT \l__hit_table_float_bool { \hit@table@font: }
+              }
+          }
+        \clist_map_inline:nn { longtblr , talltblr , longtabs , talltabs }
+          {
+            \AddToHook { env/##1/begin }
+              {
+                \SetTblrInner [##1] { colsep = \tabcolsep }
+                \hit@table@font:
+              }
+          }
+        \clist_map_inline:nn { longtblr , longtabs }
+          {
+            \AddToHook { env/##1/begin }
+              { \SetTblrInner [##1] { rowhead = 1 } }
+          }
+        \cs_if_exist:NT \DeclareTblrTemplate
+          {
+            \DefTblrTemplate { caption-tag } { default } { \fnum@table }
+            \cs_if_exist:NT \hit@caption@separator
+              {
+                \DefTblrTemplate { caption-sep } { default }
+                  { \__hit_table_tblr_captype: \hit@caption@separator }
+              }
+            \cs_if_exist:NT \hit@caption@font:
+              {
+                \SetTblrStyle { caption }
+                  { font = \__hit_table_tblr_captype: \hit@caption@font: }
+                \SetTblrStyle { capcont }
+                  { font = \__hit_table_tblr_captype: \hit@caption@font: }
+              }
+            \cs_if_exist:NT \hit@caption@separator
+              {
+                \cs_if_exist:NTF \DeclareTblrKeys
+                  {
+                    \DeclareTblrKeys { table/outer }
+                      {
+                        caption-en .code:n =
+                          { \__tblr_outer_gput_spec:nn { caption-en } {##1} } ,
+                      }
+                  }
+                  {
+                    \keys_if_exist:nnT { tblr-outer } { caption }
+                      {
+                        \keys_define:nn { tblr-outer }
+                          {
+                            caption-en .code:n =
+                              { \__tblr_outer_gput_spec:nn { caption-en } {##1} } ,
+                          }
+                      }
+                  }
+                \DeclareTblrTemplate { caption } { hithesis }
+                  {
+                    \noindent
+                    \hbox_to_wd:nn { \hsize }
+                      {
+                        \tex_hss:D
+                        \parbox { \textwidth }
+                          {
+                            \UseTblrTemplate { caption } { normal }
+                            \__hit_table_tblr_en_line:
+                          }
+                        \tex_hss:D
+                      }
+                    \par
+                  }
+                \SetTblrTemplate { caption } { hithesis }
+              }
+            \DefTblrTemplate { capcont } { default }
+              {
+                \makebox [ \hsize ] [ r ]
+                  {
+                    \fnum@table
+                    \bool_if:NTF \g__hit_en_bool
+                      { ~ ( Continued ) } { （续表） }
+                  }
+                \par
+              }
+            \SetTblrTemplate { contfoot } { empty }
+          }
+      }
+  }
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{macro}{\ltfontsize}
+% 用法 \cs{ltfontsize}\marg{字号命令}，改某一张长表格内部的字号与行距。
+%    \begin{macrocode}
+\NewDocumentCommand \ltfontsize { m }
+  { \cs_set:Npn \LT@array { #1 \hit@original@longtable@array } }
+%    \end{macrocode}
+% \end{macro}
+%
+%    \begin{macrocode}
+%</shared-table>
+%    \end{macrocode}
+%
+% \Finale

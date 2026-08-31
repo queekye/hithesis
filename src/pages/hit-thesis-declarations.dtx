@@ -1,0 +1,194 @@
+% \iffalse meta-comment
+%
+% hit-thesis-declarations.dtx 是原创性声明与使用授权书
+%
+% \fi
+%
+% \section{原创性声明与使用授权书}
+%
+%    \begin{macrocode}
+%<*thesis-declarations>
+%    \end{macrocode}
+%
+%    \begin{macro}{\hit@declarations@other}
+%    \begin{macrocode}
+\cs_new_protected:Npn \hit@declarations@signature:n #1
+  {
+    \hspace { 6em } #1 \hfill
+    \hit@term@declarations@date \hit@term@declarations@date@blank
+  }
+\cs_set:Npn \hit@declarations@other
+  {
+%
+~\hit@clear@page
+ \hit@appendix@chapter*{\hit@term@declarations@heading@zh}[\hit@term@declarations@heading@en]~
+%    \end{macrocode}
+%
+% \changes{v3.2a}{2026/08/27}{声明页改照 Word 范例的段落序列排：\cs{vspace}
+%   换成空段，两个小节标题走 \option{declarations-subheading} 目标}
+%
+% 照研究生范例 \file{docx} 段 708--728 排。间隔全是\emph{空段}，不是
+% \cs{vspace}：章标题之后一个 16\,bp 的，小节标题前后各一个，两节之间三个
+% （四号），末两个签名行之间一个。
+%
+% 空段一律按\emph{西文}自然行高算：范例那几段没写 \texttt{w:rFonts} 的 ascii
+% 槽，继承 docDefaults 的 Times New Roman。实测那三个四号空段是 20.16 一档，
+% 正是 1.25×1.15×14；按汉字的 1.296875 算成 22.70 就多出 7.7，整页会溢出。
+%    \begin{macrocode}
+\hitenter*[lines=1,size=16bp,font-en=serif,line-spacing=1.25]%
+\hit@format@par:nn{statement-heading}{\hit@term@declarations@statement}%
+\hitenter*[lines=1,size=xiaosi,font-en=serif,line-spacing=1.25]%
+\par\hit@term@declarations@statement@text
+\hitenter*[lines=1,size=xiaosi,font-en=serif,line-spacing=1.25]%
+\par\hit@declarations@signature:n{\hit@term@declarations@author@signature}%
+\hitenter*[lines=3,size=sihao,font-en=serif,line-spacing=1.25]%
+\hit@format@par:nn{authorization-heading}{\hit@term@declarations@authorization}%
+\hitenter*[lines=1,size=xiaosi,font-en=serif,line-spacing=1.25]%
+\par\hit@term@declarations@authorization@text
+\hitenter*[lines=2,size=xiaosi,font-en=serif,line-spacing=1.25]%
+\par\hit@declarations@signature:n{\hit@term@declarations@author@signature}%
+\hitenter*[lines=1,size=xiaosi,font-en=serif,line-spacing=1.25]%
+\par\hit@declarations@signature:n{\hit@term@declarations@supervisor@signature}
+  }
+%    \end{macrocode}
+%    \end{macro}
+%    \begin{macro}{\hit@declarations@bachelor}
+%    \begin{macrocode}
+\cs_set:Npn \hit@declarations@bachelor
+  {
+%
+~\hit@clear@page
+%    \end{macrocode}
+%
+% \changes{v3.1b}{2022/06/06}{修改深圳校区原创性声明标题为黑体三号}
+% \changes{v3.1d}{2025/03/03}{修改哈尔滨本科模板中没注意到的 \meta{chapterbold} 的问题。\issue[185]}
+% \changes{v3.2a}{2026/08/16}{三个校区的本科声明页统一，深圳与威海两支删掉}
+% 三个校区的本科声明页已经统一，只剩这一套：两行标题、原创性声明小标题、
+% 声明正文、作者签名一行，隔 19\,mm 之后使用权限小标题、权限正文、
+% 作者与导师签名各一行。
+%    \begin{macrocode}
+ \hit@chapter*{\hit@term@declarations@heading@line@one@bachelor\\~\hit@term@declarations@heading@line@two@bachelor}~
+ \addcontentsline{toc}{chapter}{\texorpdfstring{\hit@if@option@T{chapterbold}{\bfseries }\hit@term@declarations@heading@line@one@bachelor\hit@term@declarations@heading@line@two@bachelor}{\hit@term@declarations@heading@line@one@bachelor\hit@term@declarations@heading@line@two@bachelor}}~
+%    \end{macrocode}
+%
+% \changes{v3.1d}{2025/03/03}{修改哈尔滨本科原创性声明的内容。\issue[172]}
+%    \begin{macrocode}
+%    \end{macrocode}
+%
+% \changes{v3.2a}{2026/08/27}{本科声明页也改照 Word 范例的段落序列排；章标题的
+%   \cs{ctexset}\{chapter/beforeskip=4mm\} 删掉，那是旧版面绕开 \option{format}
+%   目标硬写的段前，范例 \file{docx} 段 660 写的是 \texttt{before="391"} 即一行，
+%   正是 \option{chapter} 目标的默认值}
+%
+% 照本科范例 \file{docx} 段 660--677 排。与研究生那一份有两处不同：小节标题带
+% 195 缇即 0.5 行的段前段后（研究生没有，见按学位的预设），两节之间是两个空段
+% （研究生是三个）。空段一律按西文自然行高算，理由同 \cs{hit@declarations@other}。
+%    \begin{macrocode}
+\hit@format@par:nn{statement-heading}{\hit@term@declarations@statement@bachelor}%
+\par\hit@term@declarations@statement@text@bachelor
+\hitenter*[lines=1,size=xiaosi,font-en=serif,line-spacing=1.25]%
+\par\hit@declarations@signature:n{\hit@term@declarations@author@signature}%
+\hitenter*[lines=2,size=sihao,font-en=serif,line-spacing=1.25]%
+\hit@format@par:nn{authorization-heading}{\hit@term@declarations@authorization@bachelor}%
+\par\hit@term@declarations@authorization@text@bachelor
+\hitenter*[lines=2,size=xiaosi,font-en=serif,line-spacing=1.25]%
+\par\hit@declarations@signature:n{\hit@term@declarations@author@signature}%
+\hitenter*[lines=1,size=xiaosi,font-en=serif,line-spacing=1.25]%
+\par\hit@declarations@signature:n{\hit@term@declarations@supervisor@signature}
+  }
+%    \end{macrocode}
+%    \end{macro}
+% \changes{v3.2a}{2026/08/22}{排过就记闸门，文末兜底不再重排}
+%    \begin{macro}{\hit@declarations@place}
+%    \changes{v3.2a}{2026/08/07}{添加星号版本，控制PDF扫描件是否显示页码}
+%
+% \changes{v3.2a}{2026/08/08}{\cs{authorization} 迁到 expl3}
+% \changes{v3.2a}{2026/08/13}{排版的活挪进 \cs{hit@declarations@place}，
+%   \cs{authorization} 只剩一层带废弃提示的转发}
+% 排版的活在这里。\cs{authorization} 只是一层带废弃提示的转发，
+% 类自己排这一页走的是这个内部命令，提示不会跟着响，理由见
+% \file{src/pages/hit-thesis-resolution.dtx} 里同样的一对。
+%    \begin{macrocode}
+\NewDocumentCommand \hit@declarations@place { s o }
+  {
+    % 排过就记一笔:老写法(\resolution/\authorization)与新写法(struct 骨架)
+    % 都汇到这里,记在这一处两条路都算数,文末兜底才不会重排
+    \hit@structure@done:n { declarations }
+
+    \IfNoValueTF {#2}
+      {
+        \hit@if@option@TF { bachelor }
+          { \hit@declarations@bachelor } { \hit@declarations@other }
+      }
+      {
+        \hit@clear@page
+        \phantomsection
+        \addcontentsline { toc } { chapter }
+          {
+            \hit@if@option@TF { bachelor }
+%    \end{macrocode}
+%
+% \changes{v3.1b}{2022/06/06}{修改深圳校区原创性声明的目录标题}
+% \changes{v3.1d}{2025/03/03}{调整 \cmd{\fi} 的位置}
+% \changes{v3.2a}{2026/08/16}{删掉深圳本科目录标题的分支，三校区统一}
+% 本科三个校区已经统一，目录里这一项都写整页那个长标题。
+%    \begin{macrocode}
+              { \hit@term@declarations@heading@bachelor@zh }
+              { \hit@term@declarations@heading@zh }
+          }
+        \hit@if@option@T { doctor }
+          {
+%    \end{macrocode}
+%
+% \changes{v1.0.13}{2018/04/05}{添加\cs{texorpdfstring}命令去除书签中带有格式时的警告}
+%    \begin{macrocode}
+            \addcontentsline { toe } { chapter }
+              {
+                \texorpdfstring
+                  { \bfseries \hit@term@declarations@heading@en }
+                  { \hit@term@declarations@heading@en }
+              }
+          }
+        \IfBooleanTF {#1}
+          {% 有星号，显示页码
+            \includepdf
+              [ fitpaper=true , pagecommand={\thispagestyle{hit@scanpage}} ] {#2}
+          }
+          {% 无星号，不显示页码
+            \includepdf
+              [ fitpaper=true , pagecommand={\thispagestyle{empty}} ] {#2}
+          }
+      }
+  }
+%    \end{macrocode}
+%    \end{macro}
+%
+%    \begin{macro}{\authorization}
+% \changes{v3.2a}{2026/08/13}{\cs{authorization} 与 \cs{authorization*} 列为旧写法，
+%   调用时提示改用 \option{struct} 的 \option{declarations} 键}
+% 旧写法，转发到上面那个。提示一份文档只报一次。
+%    \begin{macrocode}
+\NewDocumentCommand \authorization { s o }
+  {
+    \hit@warn@renamed@command { authorization }
+      { struct/backmatter/declarations }
+    \IfBooleanTF {#1}
+      {
+        \IfNoValueTF {#2}
+          { \hit@declarations@place * }
+          { \hit@declarations@place * [{#2}] }
+      }
+      {
+        \IfNoValueTF {#2}
+          { \hit@declarations@place }
+          { \hit@declarations@place [{#2}] }
+      }
+  }
+%    \end{macrocode}
+%    \end{macro}
+%
+%    \begin{macrocode}
+%</thesis-declarations>
+%    \end{macrocode}
+%
+% \Finale
