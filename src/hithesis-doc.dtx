@@ -16,6 +16,7 @@
 %
 % ^^A ======================================================================
 % ^^A hithesis 用户手册
+% Modified 2026-09-06: see FORK-NOTES.md for the unofficial fork changes.
 % ^^A
 % ^^A 只放面向用户的说明（模板介绍 / 安装 / 使用说明），不含任何实现代码，
 % ^^A 也不参与 docstrip：hithesis.ins 从不读这个文件。
@@ -374,6 +375,24 @@
 % 取三态的有 \option{toc/english}、\option{toc/blank}、\option{toc/four}、
 % \option{style/headrule}、\option{style/pagenumberline/mainmatter} 与
 % \option{style/pagenumberline/frontmatter}。
+%
+% \subsubsection{本部研究生 2025 指南适配（非官方开发版）}
+% \option{degreecategory} 可取 \texttt{legacy}（默认）、\texttt{academic}、
+% \texttt{professional}，用于本部硕博封面的学科或专业学位类别选择。
+% 新文档建议显式选择实际学位类型；该选项与全日制学习方式无关。
+% \option{guide2025=true} 启用本部理工类研究生 2025 指南版心、字体、
+% 声明与封面换行适配，默认关闭。启用后未指定学位类型时采用学术学位。
+% \begin{latex}
+% \documentclass[type=doctor,campus=harbin,fontset=windows,
+%   guide2025=true,degreecategory=professional]{hithesisbook}
+% \end{latex}
+% \texttt{guide2025} 仅接受哈尔滨校区硕士和博士。英文具体学位、学科或类别名称
+% 仍需根据学校公布的名称填写。显式设置 \option{newgeometry} 优先于预设；
+% 缺少 Times New Roman 时回退字体并发出警告。来源、验证限制与差异见
+% \texttt{FORK-NOTES.md}，本分支不代表上游正式发布或学校认证。
+% 对使用人工智能工具的论文，可使用 \texttt{aideclaration} 环境提供独立的
+% 人工智能使用声明。作者应如实填写工具、版本、网址、用途、环节、参数及验证过程，
+% 并按学院要求确定位置；此环境不自动生成事实或承诺，不改变原创性声明原文。
 %
 % \subsubsection{旧写法}
 % \label{sec:deprecated}

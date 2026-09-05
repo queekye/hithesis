@@ -1,0 +1,31 @@
+% Synthetic example for the modified hithesis development branch.
+\providecommand{\TemplateOptions}{type=doctor,degreecategory=professional}
+\providecommand{\TemplateGuideOptions}{guide2025=true,}
+\edef\TemplateClass{\noexpand\documentclass[fontset=windows,campus=harbin,
+  \TemplateGuideOptions\TemplateOptions]{hithesisbook}}
+\TemplateClass
+\hitsetup{
+  style={library=true},toc={blank=false},
+  ctitle={研究生学位论文模板验证示例},ctitlecover={研究生学位论文模板验证示例},
+  ctitleone={研究生学位论文},ctitletwo={模板验证示例},
+  cxueke={工程},csubject={电子信息},caffil={示例学院},
+  cauthor={测试学生},csupervisor={测试导师},
+  ccosupervisor={测试行业导师（示例先进技术有限公司首席工程师）},
+  cdate={2026年9月},firstpagecdate={2026年9月},
+  etitle={A Synthetic Example for Graduate Dissertation Template Validation},
+  exueke={Engineering},esubject={Electronic Information},
+  eauthor={Test Candidate},esupervisor={Prof. Test Supervisor},
+  ecosupervisor={Dr. Industry Mentor, Chief Engineer, Example Technology Company},
+  eaffil={School of Example Studies, Harbin Institute of Technology},
+  edate={September, 2026},ckeywords={模板,验证},ekeywords={template,validation}}
+\begin{cabstract}本文件仅用于模板验证，所有人员与单位均为测试占位信息。\end{cabstract}
+\begin{eabstract}This document contains synthetic information for template validation.\end{eabstract}
+\begin{document}
+\frontmatter\makecover
+\mainmatter\chapter{模板验证}
+本示例用于核对封面、正文版心及声明页面。\nocite{smoke-reference}
+\bibliographystyle{plain}\bibliography{smoke}
+\authorization
+\providecommand{\ExampleAIStatement}{}
+\ExampleAIStatement
+\end{document}

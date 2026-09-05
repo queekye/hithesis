@@ -1,6 +1,7 @@
 % \iffalse meta-comment
 %
 % Copyright (C) 2017- by Yanshuo Chu <yanshuoc@gmail.com>
+% Modified 2026-09-06 for the queekye development fork; see FORK-NOTES.md.
 %
 % This file may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License, either version 1.3a
@@ -37,6 +38,7 @@
 % \changes{v3.0.0}{2020/05/21}{此处添加book控制项，用于cfg中定理等控制}
 %    \begin{macrocode}
 \RequirePackage{kvoptions}
+\ClassInfo{hithesisbook}{Unofficial modified version (queekye, 2026-09-06); see FORK-NOTES.md}
 \SetupKeyvalOptions{
   family=hit,
   prefix=hit@,
@@ -44,6 +46,13 @@
 }
 
 \newif\ifhit@bachelor
+%    \end{macrocode}
+% \changes{v3.2a}{0000/00/00}{增加显式学位类型与本部 2025 规范选项，保留既有默认行为。}
+%    \begin{macrocode}
+\DeclareBoolOption[false]{guide2025}
+\DeclareStringOption[legacy]{degreecategory}
+\newif\ifhit@professional
+\newif\ifhit@explicitdegree
 \newif\ifhit@master
 \newif\ifhit@doctor
 \newif\ifhit@postdoc
@@ -356,6 +365,20 @@
   { \tl_gset:Nn \g__hit_headrule_tl {#1} }
 \ExplSyntaxOff
 \ProcessKeyvalOptions*
+\ExplSyntaxOn
+\str_case:VnF \hit@degreecategory
+  {
+    {legacy} { }
+    {academic} { \legacy_if_set_true:n { hit@explicitdegree } }
+    {professional} {
+      \legacy_if_set_true:n { hit@explicitdegree }
+      \legacy_if_set_true:n { hit@professional }
+    }
+  }
+  { \ClassError{hithesisbook}{Invalid~degreecategory}{Use~legacy,~academic~or~professional.} }
+\legacy_if:nT { hit@guide2025 }
+  { \legacy_if_set_true:n { hit@explicitdegree } }
+\ExplSyntaxOff
 %    \end{macrocode}
 %
 % \changes{v3.2a}{0000/00/00}{深圳校区本科现在直接指向本部本科模板，旧深圳本科模板代码暂时保留}
@@ -464,13 +487,29 @@
 % \changes{v3.0.13}{2020/11/10}{重新设置geometry的默认选项}
 %    \begin{macrocode}
 \ExplSyntaxOn
+\legacy_if:nT { hit@guide2025 }
+  {
+    \bool_lazy_all:nF {
+      { \legacy_if_p:n { hit@harbin } }
+      { \bool_lazy_or_p:nn { \legacy_if_p:n { hit@master } } { \legacy_if_p:n { hit@doctor } } }
+    }
+      { \ClassError{hithesisbook}{guide2025~requires~Harbin~master~or~doctor}{Use~the~campus-specific~guideline.} }
+  }
 \bool_lazy_any:nF
   {
     { \legacy_if_p:n { hit@geometrynewone } }
     { \legacy_if_p:n { hit@geometrynewtwo } }
     { \legacy_if_p:n { hit@geometrynewno } }
   }
-  { \legacy_if_set_true:n { hit@geometrynewtwo } }
+  {
+    \bool_lazy_all:nTF {
+      { \legacy_if_p:n { hit@guide2025 } }
+      { \legacy_if_p:n { hit@harbin } }
+      { \bool_lazy_or_p:nn { \legacy_if_p:n { hit@master } } { \legacy_if_p:n { hit@doctor } } }
+    }
+      { \legacy_if_set_true:n { hit@geometrynewno } }
+      { \legacy_if_set_true:n { hit@geometrynewtwo } }
+  }
 \ExplSyntaxOff
 %    \end{macrocode}
 %
@@ -644,6 +683,11 @@
   BoldItalicFont = *-BoldItalic ,
   Extension = .otf ,
   ]
+\hit@ifhrbmd{\hit@ifT{guide2025}{%
+  \IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{%
+    \ClassWarningNoLine{hithesisbook}{Times New Roman missing; install it before final submission}%
+  }%
+}}{}
 \setsansfont{texgyreheros}[
   UprightFont = *-regular ,
   BoldFont = *-bold ,
@@ -3446,6 +3490,16 @@ breaklines=true
 \def\hit@ecosupervisortitle{Co-Supervisor off Campus}
 \def\hit@edegreetitle{Academic Degree Applied for}
 \def\hit@esubjecttitle{Specialty}
+\hit@ifhrbmd{\hit@ifT{explicitdegree}{%
+  \def\hit@csubjecttitle{\hit@if{professional}{类别}{学科}}%
+  \def\hit@edegreetitle{\hit@if{professional}{Professional}{Academic} Degree Applied for}%
+  \def\hit@esubjecttitle{\hit@if{professional}{Professional Degree Category}{Speciality}}%
+  \hit@ifT{professional}{\gdef\hit@cdegree{专业学位\hit@cxuewei}}%
+}}{}
+\hit@ifhrbmd{\hit@ifT{guide2025}{%
+  \def\hit@ccosupervisortitle{行业导师}%
+  \def\hit@ecosupervisortitle{Industry Supervisor}%
+}}{}
 \def\hit@eaffiltitle{Affiliation}
 %    \end{macrocode}
 %
@@ -3693,6 +3747,17 @@ breaklines=true
 \def\hit@cbraceright{）}
 \def\hit@ebraceleft{(}
 \def\hit@ebraceright{)}
+\hit@ifhrbmd{\hit@ifT{guide2025}{%
+  \renewcommand{\hit@declaretext}{%
+本人郑重声明：此处所提交的学位论文《\hit@ctitle》，是本人在导师指导下，在哈尔滨工业大学攻读学位期间独立进行学术研究工作或专业实践工作所取得的成果，且学位论文中除已标注引用文献、资料的部分外不包含他人完成或已发表的成果。对本学位论文的学术研究工作或专业实践工作做出重要贡献的个人和集体，均已在文中以明确方式注明。}%
+  \renewcommand{\hit@authorizationtext}{%
+学位论文是研究生在哈尔滨工业大学攻读学位期间完成的成果，知识产权归属哈尔滨工业大学。学位论文的使用权限如下：\par
+（1）学校可以采用影印、缩印或其他复制手段保存研究生上交的学位论文，并向国家图书馆报送学位论文；（2）学校可以将学位论文部分或全部内容编入有关数据库进行检索和提供相应阅览服务；（3）研究生毕业后发表与此学位论文内容相关的学术论文和其他成果时，应征得导师同意，且第一署名单位为哈尔滨工业大学。\par
+保密学位论文在保密期内遵守有关保密规定，解密后适用于此使用权限规定。\par
+本人知悉学位论文的使用权限，并将遵守有关规定。}%
+  \renewcommand{\hit@publication@ctitle}{攻读\hit@cxuewei 学位期间取得创新性成果}%
+  \renewcommand{\hit@publication@etitle}{Innovative Achievements during \hit@exuewei\ Studies}%
+}}{}
 %</bookcfg>
 %    \end{macrocode}
 %
@@ -3810,7 +3875,7 @@ breaklines=true
 \newcommand{\hit@second@titlepage@postdoc}{
   \hit@iffontset{siyuan}%
   {\xiaosi[1]\vspace*{0.65em}}%
-  {\xiaosi[1]\songti\textcolor[rgb]{1,1,1}{{\hit@hi}}}%
+  {\xiaosi[1]\songti\phantom{{\hit@hi}}}%
   \vspace*{1.2cm}
   \begin{center}
     \parbox[t][8cm][t]{\textwidth}{
@@ -3856,7 +3921,7 @@ breaklines=true
 \newcommand{\hit@first@titlepage@bachelor}{
 \hit@iffontset{siyuan}%
 {\xiaosi[1]\vspace*{0.65em}}%
-{\xiaosi[1]\textcolor[rgb]{1,1,1}{\songti{\hit@hi}}}%
+{\xiaosi[1]\phantom{\songti{\hit@hi}}}%
   \vspace*{1.2cm}
   \begin{center}
     \parbox[t][3.4cm][t]{\textwidth}{
@@ -4031,7 +4096,7 @@ breaklines=true
   % 封面一
 \hit@iffontset{siyuan}%
 {\xiaosi[1]\vspace*{0.65em}}%
-{\xiaosi[1]\textcolor[rgb]{1,1,1}{\songti{\hit@hi}}}%
+{\xiaosi[1]\phantom{\songti{\hit@hi}}}%
 \hit@ifand{harbin}{bachelor}{\vspace*{8.5mm}}{\vspace*{1.2cm}}
 \begin{center}
   \begin{center}\xiaoyi[1]\songti\textbf{%
@@ -4051,10 +4116,13 @@ breaklines=true
 % 根据 \issue[97] 看来，\issue[149] 的情报并不完全准确，深圳硕士还要加上这个 \cs{cstudenttype}
 %    \begin{macrocode}
       \begin{center}\xiaoer[1]\songti\bfseries
-        \hit@ifstudenttype
+        \hit@ifhrbmd{\hit@if{explicitdegree}
+          {\hit@cbraceleft\hit@if{professional}{专业学位论文}{学术学位论文}\hit@cbraceright}
+          {\hit@ifstudenttype{\hit@cbraceleft\hit@cstudenttype\hit@cbraceright}}}
+        {\hit@ifstudenttype
         {
           \hit@cbraceleft\hit@cstudenttype\hit@cbraceright
-        }
+        }}
       \end{center}
       \hit@ifand{harbin}{bachelor}{\vspace{-3.5mm}}{}
     \parbox[t][7.8cm][t]{\textwidth}{%
@@ -4202,7 +4270,10 @@ breaklines=true
     {\sihao
       \setlength{\hit@title@width}{6em}
       \begin{center} \renewcommand{\arraystretch}{1.62} \songti
-  \begin{tabular}{l@{\hit@title@csep}l}
+  \hit@ifhrbmd{\hit@if{guide2025}
+    {\begin{tabular}{l@{\hit@title@csep}>{\raggedright\arraybackslash}p{.50\textwidth}}}
+    {\begin{tabular}{l@{\hit@title@csep}l}}}
+    {\begin{tabular}{l@{\hit@title@csep}l}}
     {\heiti \hit@put@title{\hit@cauthortitle}}	&	\hit@cauthor\\
     {\heiti \hit@put@title{\hit@csupervisortitle}}	&	\hit@csupervisor\\
         \hit@ifnotempty\hit@cassosupervisor{%
@@ -4265,7 +4336,7 @@ breaklines=true
       \hit@if{fulltime}{}%
         {\begin{center}\hit@ebraceleft\hit@estudenttype\hit@ebraceright\end{center}}%
       } %与中文保持一致，删除in {\hit@exueke}
-    \parbox[t][7cm][t]{\textwidth}{%
+    \parbox[t][\hit@ifhrbmd{\hit@if{guide2025}{5cm}{7cm}}{7cm}][t]{\textwidth}{%
 %    \end{macrocode}
 %
 % \changes{v3.1d}{2025/03/03}{根据 \issue[227] 修改英文标题不能换行的问题}
@@ -4280,7 +4351,10 @@ breaklines=true
 \hit@ifT{subtitle}{\hit@title@esep\MakeUppercase{\hit@esubtitle}}}\end{center}}
     %★★★★若信息内容不太长，不会引起信息内容分行时，使用tabular环境，否则使用下面的tabularx环境。
     {\sihao\renewcommand{\arraystretch}{1.3}
-      \begin{tabular}{@{}l@{~}l@{}}
+      \hit@ifhrbmd{\hit@if{guide2025}
+        {\begin{tabular}{@{}l@{~}>{\raggedright\arraybackslash}p{.47\textwidth}@{}}}
+        {\begin{tabular}{@{}l@{~}l@{}}}}
+        {\begin{tabular}{@{}l@{~}l@{}}}
   \textbf{\hit@eauthortitle\hit@title@esep}		&	\hit@eauthor\\
   \textbf{\hit@esupervisortitle\hit@title@esep}	&	\hit@esupervisor\\
       \hit@ifnotempty\hit@eassosupervisor{%
@@ -4757,6 +4831,13 @@ breaklines=true
   font=\wuhao\rm,
 }
 %    \end{macrocode}
+% \changes{v3.2a}{0000/00/00}{提供人工智能使用声明环境，承载 2026 年指南要求的作者真实披露。}
+%    \begin{macrocode}
+\newenvironment{aideclaration}{%
+  \hit@clearpage
+  \hit@appendix@chapter*{人工智能使用声明}[Statement on AI Tool Use]%
+}{\par}
+%    \end{macrocode}
 %    \begin{macro}{\hit@authorization@other}
 %    \begin{macrocode}
 \def\hit@authorization@other{%
@@ -4764,21 +4845,22 @@ breaklines=true
   \hit@appendix@chapter*{\hit@authorization@ctitle}[\hit@authorization@etitle]
   \xiaosi[1.6]\vspace{\baselineskip}
 \begin{center}\xiaosan\heiti\hit@declarename\end{center}
-\par\hit@declaretext
+\par\hit@declaretext\hit@ifT{guide2025}{\par}
 \vspace{\baselineskip}
 \par\hspace{6em}\hit@authorsig\hfill\hit@frontdate\hit@datefill
 \vspace{2\baselineskip}
 \begin{center}\xiaosan\heiti\hit@authorizationtitle\end{center}
-\par\hit@authorizationtext
-\vspace{2\baselineskip}
+\par\hit@authorizationtext\hit@ifT{guide2025}{\par}
+\hit@if{guide2025}{\vspace{\baselineskip}}{\vspace{2\baselineskip}}
 \par\hspace{6em}\hit@authorsig\hfill\hit@frontdate\hit@datefill
-\hit@if{english}{\vspace{\baselineskip}}{\vspace{2\baselineskip}}
+\hit@if{guide2025}{\vspace{\baselineskip}}{\hit@if{english}{\vspace{\baselineskip}}{\vspace{2\baselineskip}}}
 %    \end{macrocode}
 %
 % 英文版和中文版这里的间距不一样
 % \changes{v3.0.0}{2020/05/21}{英文版和中文版这里的间距不一样}
 %    \begin{macrocode}
 \par\hspace{6em}\hit@teachersig\hfill\hit@frontdate\hit@datefill
+  \hit@ifT{guide2025}{\par}%
 }
 %    \end{macrocode}
 %    \end{macro}

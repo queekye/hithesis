@@ -1,5 +1,7 @@
 # hithesis 哈尔滨工业大学LaTeX论文模板
 
+> 本分支是基于 [hithesis/hithesis](https://github.com/hithesis/hithesis) 的非官方规范适配开发版，由 queekye 维护修改。上游作者版权和许可声明完整保留，未获上游或学校认证。具体来源、变更、适用范围和构建限制见 [FORK-NOTES.md](FORK-NOTES.md)；PR 拆分草稿见 [PR-DRAFT.md](PR-DRAFT.md)。
+
 [![招生](https://img.shields.io/badge/初砚硕课题组招生-进行中-green)](https://dustincys.github.io/cn/2025/03/jobad/)
 
 [![Test](https://github.com/hithesis/hithesis/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/hithesis/hithesis/actions/workflows/test.yml)
