@@ -1,0 +1,180 @@
+%% Non-official student extension; maintained by queekye.
+%% Copyright (C) 2017--2026 hithesis contributors (referenced parent macros).
+%% Copyright (C) 2026 queekye (separately named adaptations and patches).
+%% Parent: hithesis/hithesis master 04963b5, https://github.com/hithesis/hithesis
+%% LPPL 1.3a or later. Upstream CC BY-NC 4.0 notice retained; non-commercial use.
+%% See LICENSE and FORK-NOTES.md. This is not a university-certified template.
+\NeedsTeXFormat{LaTeX2e}[2021/06/01]
+\ProvidesPackage{hitstudent-core}[2026/10/09 v0.1 Optional student adaptations]
+\RequirePackage{etoolbox}
+\@ifclassloaded{hitthesis-student}{}{%
+  \PackageError{hitstudent-core}{Load the hitthesis-student class first}%
+    {This package depends on the wrapper's validated options.}\endinput}
+
+% Refuse an unexpected upstream implementation instead of silently losing a patch.
+\newcommand\hitstudent@patch[4]{%
+  \patchcmd{#1}{#2}{#3}{}{%
+    \ClassError{hitthesis-student}{Upstream patch failed: #4}%
+      {Use the documented upstream baseline or review the changed parent macro.}}}
+\newcommand\hitstudent@prepend[3]{%
+  \pretocmd{#1}{#2}{}{%
+    \ClassError{hitthesis-student}{Upstream patch failed: #3}%
+      {Use the documented upstream baseline or review the changed parent macro.}}}
+
+\newif\ifhitstudent@hrbmd
+\ifboolexpr{bool {hit@harbin} and (bool {hit@master} or bool {hit@doctor})}%
+  {\hitstudent@hrbmdtrue}{\hitstudent@hrbmdfalse}
+\newcommand*\hitstudent@requirehrbmd[1]{%
+  \ifhitstudent@hrbmd\else
+    \ClassError{hitthesis-student}{#1 requires Harbin master or doctor}%
+      {Keep the upstream defaults for other campuses or thesis types.}%
+  \fi}
+\newif\ifhitstudent@explicitdegree
+\newif\ifhitstudent@professional
+\ifdefstring{\hitstudent@degreecategory}{legacy}{}{%
+  \ifdefstring{\hitstudent@degreecategory}{academic}{%
+    \hitstudent@explicitdegreetrue}{%
+    \ifdefstring{\hitstudent@degreecategory}{professional}{%
+      \hitstudent@explicitdegreetrue\hitstudent@professionaltrue}{%
+      \ClassError{hitthesis-student}{Invalid degreecategory}%
+        {Use legacy, academic or professional.}}}}
+\ifdefstring{\hitstudent@layout}{upstream}{}{%
+  \ifdefstring{\hitstudent@layout}{c}{%
+    \hitstudent@requirehrbmd{layout=c}}{%
+    \ClassError{hitthesis-student}{Invalid layout}{Use upstream or c.}}}
+\ifbool{hitstudent@guide2025}{%
+  \hitstudent@requirehrbmd{guide2025=true}%
+  \hitstudent@explicitdegreetrue
+}{}
+\ifhitstudent@explicitdegree
+  \hitstudent@requirehrbmd{degreecategory}%
+\fi
+\ifhitstudent@anonymous\hitstudent@requirehrbmd{anonymous=true}\fi
+\ifhitstudent@tocfix\hitstudent@requirehrbmd{tocfix=true}\fi
+\ifhitstudent@floatlayout\hitstudent@requirehrbmd{floatlayout=true}\fi
+
+% The public switch lets a document omit identity-bearing back matter explicitly.
+% It does not remove names from body text, self citations, source files or history.
+\newcommand{\hitanonymousTF}[2]{\ifhitstudent@anonymous#1\else#2\fi}
+
+\ifhitstudent@hrbmd
+  % Independent, default-on technical fix: retain spacing without extractable
+  % white text. Shared parent macros are patched only for this supported scope.
+  \ifhitstudent@fixhidden
+    \hitstudent@patch{\hit@second@titlepage@postdoc}%
+      {\textcolor[rgb]{1,1,1}{{\hit@hi}}}{\phantom{{\hit@hi}}}%
+      {postdoc hidden placeholder}%
+    \hitstudent@patch{\hit@first@titlepage@bachelor}%
+      {\textcolor[rgb]{1,1,1}{\songti{\hit@hi}}}{\phantom{\songti{\hit@hi}}}%
+      {bachelor hidden placeholder}%
+    \hitstudent@patch{\hit@first@titlepage@other}%
+      {\textcolor[rgb]{1,1,1}{\songti{\hit@hi}}}{\phantom{\songti{\hit@hi}}}%
+      {graduate hidden placeholder}%
+  \fi
+
+  % Explicit degree categories can be used independently of the 2025 preset.
+  \ifhitstudent@explicitdegree
+    \ifhitstudent@professional
+      \def\hit@csubjecttitle{类别}%
+      \def\hit@edegreetitle{Professional Degree Applied for}%
+      \def\hit@esubjecttitle{Professional Degree Category}%
+      \gdef\hit@cdegree{专业学位\hit@cxuewei}%
+    \else
+      \def\hit@csubjecttitle{学科}%
+      \def\hit@edegreetitle{Academic Degree Applied for}%
+      \def\hit@esubjecttitle{Speciality}%
+    \fi
+  \fi
+
+  \ifbool{hitstudent@guide2025}{%
+    \IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{%
+      \ClassWarningNoLine{hitthesis-student}{Times New Roman is missing;
+        the upstream TeX Gyre Termes font is retained. Install Times New Roman
+        before claiming compliance with the 2025 font requirement}}%
+    \def\hit@ccosupervisortitle{行业导师}%
+    \def\hit@ecosupervisortitle{Industry Supervisor}%
+    \renewcommand{\hit@publication@ctitle}{攻读\hit@cxuewei 学位期间取得创新性成果}%
+    \renewcommand{\hit@publication@etitle}{Innovative Achievements during \hit@exuewei\ Studies}%
+    % Appendix 1 of the current official attachment served on 2026-10-09.
+    % Preserve the official AI-use sentence, whose spacing is normalized here.
+    \renewcommand{\hit@declaretext}{%
+本人郑重声明：此处所提交的学位论文《\hit@ctitle》，是本人在导师指导下，在哈尔滨工业大学攻读学位期间独立进行学术研究工作或专业实践工作所取得的成果，且学位论文中除已标注引用文献、资料的部分外不包含他人完成或已发表的成果。对本学位论文的学术研究工作或专业实践工作做出重要贡献的个人和集体，均已在文中以明确方式注明；对使用 AI 工具的情况均已在文中以明确方式标注。}%
+    \renewcommand{\hit@authorizationtext}{%
+学位论文是研究生在哈尔滨工业大学攻读学位期间完成的成果，知识产权归属哈尔滨工业大学。学位论文的使用权限如下：\par
+（1）学校可以采用影印、缩印或其他复制手段保存研究生上交的学位论文，并向国家图书馆报送学位论文；（2）学校可以将学位论文部分或全部内容编入有关数据库进行检索和提供相应阅览服务；（3）研究生毕业后发表与此学位论文内容相关的学术论文和其他成果时，应征得导师同意，且第一署名单位为哈尔滨工业大学。\par
+保密学位论文在保密期内遵守有关保密规定，解密后适用于此使用权限规定。\par
+本人知悉学位论文的使用权限，并将遵守有关规定。}%
+    % Use bounded paragraph columns for long faculty/discipline/supervisor fields.
+    \hitstudent@patch{\hit@second@titlepage@other}%
+      {\begin{tabular}{l@{\hit@title@csep}l}}%
+      {\begin{tabular}{l@{\hit@title@csep}>{\raggedright\arraybackslash}p{.50\textwidth}}}%
+      {Chinese cover wrapping}%
+    \hitstudent@patch{\hit@engcover}%
+      {\begin{tabular}{@{}l@{~}l@{}}}%
+      {\begin{tabular}{@{}l@{~}>{\raggedright\arraybackslash}p{.47\textwidth}@{}}}%
+      {English cover wrapping}%
+    \hitstudent@patch{\hit@engcover}%
+      {\parbox[t][7cm][t]{\textwidth}}{\parbox[t][5cm][t]{\textwidth}}%
+      {English cover title block}%
+    % End paragraphs before spacing; fit the current declaration in one page.
+    \hitstudent@patch{\hit@authorization@other}%
+      {\par\hit@declaretext}{\par\hit@declaretext\par}%
+      {originality paragraph ending}%
+    \hitstudent@patch{\hit@authorization@other}%
+      {\par\hit@authorizationtext}{\par\hit@authorizationtext\par}%
+      {permission paragraph ending}%
+    \hitstudent@patch{\hit@authorization@other}%
+      {\vspace{2\baselineskip}}{\vspace{\baselineskip}}%
+      {originality signature spacing}%
+    \hitstudent@patch{\hit@authorization@other}%
+      {\vspace{2\baselineskip}}{\vspace{\baselineskip}}%
+      {permission signature spacing}%
+    \hitstudent@patch{\hit@authorization@other}%
+      {\ifhit@english\vspace{\baselineskip}\else\vspace{2\baselineskip}\fi}%
+      {\vspace{\baselineskip}}{supervisor signature spacing}%
+  }{}
+
+  \ifhitstudent@tocfix
+    % @tempdima is also used by section entries and must be set per chapter.
+    \hitstudent@prepend{\l@chapter}{\setlength\@tempdima{4em}}%
+      {chapter TOC hanging width}%
+  \fi
+  \ifhitstudent@floatlayout
+    % Project layout choice, not a university-mandated numeric requirement.
+    \renewcommand{\topfraction}{0.92}%
+    \renewcommand{\bottomfraction}{0.80}%
+    \renewcommand{\textfraction}{0.05}%
+    \renewcommand{\floatpagefraction}{0.85}%
+    \setlength{\@fptop}{0pt}%
+  \fi
+  \ifhitstudent@anonymous
+    % Suppress the entire identity rows rather than leave empty labels behind.
+    \hitstudent@patch{\hit@second@titlepage@other}%
+      {{\heiti \hit@put@title{\hit@cauthortitle}}}%
+      {\ifhitstudent@anonymous\else{\heiti \hit@put@title{\hit@cauthortitle}}}%
+      {Chinese identity row beginning}%
+    \hitstudent@patch{\hit@second@titlepage@other}%
+      {{\heiti \hit@put@title{\hit@cdegreetitle}}}%
+      {\fi{\heiti \hit@put@title{\hit@cdegreetitle}}}%
+      {Chinese identity row ending}%
+    \hitstudent@patch{\hit@engcover}%
+      {\textbf{\hit@eauthortitle\hit@title@esep}}%
+      {\ifhitstudent@anonymous\else\textbf{\hit@eauthortitle\hit@title@esep}}%
+      {English identity row beginning}%
+    \hitstudent@patch{\hit@engcover}%
+      {\textbf{\hit@edegreetitle\hit@title@esep}}%
+      {\fi\textbf{\hit@edegreetitle\hit@title@esep}}%
+      {English identity row ending}%
+    \hitstudent@prepend{\makecover}{%
+      \cauthor{}\csupervisor{}\cassosupervisor{}\ccosupervisor{}%
+      \cstudentid{}\eauthor{}\esupervisor{}\eassosupervisor{}\ecosupervisor{}%
+      \hypersetup{pdfauthor={}}%
+    }{anonymous cover identity clearing}%
+    \AtBeginDocument{\hypersetup{pdfauthor={}}}%
+    \ClassWarningNoLine{hitthesis-student}{Anonymous cover mode is enabled.
+      Use hitanonymousTF to omit identity-bearing back matter. Review body text,
+      self citations, attachments and source history manually}%
+  \fi
+  \ifdefstring{\hitstudent@layout}{c}{\RequirePackage{hitlayoutc}}{}%
+\fi
+\endinput

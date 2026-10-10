@@ -1,0 +1,24 @@
+This is a non-official, non-commercially distributed student extension of
+hithesis/hithesis, maintained by queekye.
+
+1. The unchanged upstream hithesis.dtx and hithesis.ins retain their original
+   copyright notices and LaTeX Project Public License (LPPL), version 1.3a or
+   any later version.
+2. The upstream README also states Creative Commons Attribution-
+   NonCommercial 4.0 (CC BY-NC 4.0) for the project Files/Codes. That notice is
+   retained in UPSTREAM-README.md. This distribution conservatively retains
+   it; it does not remove the upstream notice or grant commercial permission.
+3. The separately named student class/packages and added scripts/documentation
+   are maintained modifications by queekye, distributed under LPPL 1.3a or
+   later together with CC BY-NC 4.0.
+4. student/gbt7714-numerical-quanjiao.bst additionally retains Zeping Lee's
+   copyright and LPPL 1.3c or later notice; see its header for the full lineage.
+
+The original work remains available at https://github.com/hithesis/hithesis .
+The exact baseline and all maintained adaptations are documented in
+FORK-NOTES.md and CHANGES.md. This project has no university certification.
+
+License texts:
+https://www.latex-project.org/lppl/lppl-1-3a/
+https://www.latex-project.org/lppl/lppl-1-3c/
+https://creativecommons.org/licenses/by-nc/4.0/

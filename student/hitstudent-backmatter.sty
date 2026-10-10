@@ -1,0 +1,84 @@
+%% Optional student extension for hithesis (https://github.com/hithesis/hithesis).
+%% Copyright (C) 2026 Queekye. The appendix-chapter and declaration interfaces
+%% use the upstream hithesisbook class, Copyright (C) 2017- its contributors.
+%% This file may be distributed and/or modified under the LaTeX Project Public
+%% License, version 1.3a or (at your option) any later version. This separately
+%% named extension is maintained by Queekye, not the upstream authors.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{hitstudent-backmatter}[2026/10/09 v1.0 Optional native back matter]
+\RequirePackage{kvoptions}
+\SetupKeyvalOptions{family=hitstudentback,prefix=hitstudentback@}
+\DeclareStringOption[guide]{mode}
+\ProcessKeyvalOptions*
+\RequirePackage{etoolbox}
+\RequirePackage{xparse}
+\RequirePackage{array,longtable}
+\@ifundefined{hit@appendix@chapter}{%
+  \PackageError{hitstudent-backmatter}{Load the hithesisbook class first}%
+    {This package uses the graduate thesis class's appendix chapter interface.}%
+  \endinput
+}{}
+\ifdefstring{\hitstudentback@mode}{guide}{}{%
+  \ifdefstring{\hitstudentback@mode}{word}{%
+    \RequirePackage{hitwordbackmatter}%
+  }{%
+    \PackageError{hitstudent-backmatter}{Unknown mode: \hitstudentback@mode}%
+      {Choose mode=guide (default) or mode=word.}%
+  }%
+}
+
+% guide: native, unframed content under the guide's section 1.7.
+% word: same native heading, plus the optional fixed-table commands.
+% Neither mode changes upstream \resolution[scan.pdf] or \resolution*[scan.pdf].
+\newenvironment{resolutiontext}{%
+  \ifhit@openright\cleardoublepage\else\clearpage\fi
+  \ifhit@english
+    \hit@appendix@chapter*{\hit@resolution@etitle}[\hit@resolution@etitle]%
+  \else
+    \hit@appendix@chapter*{\hit@resolution@ctitle}[\hit@resolution@etitle]%
+  \fi
+  \begingroup\normalsize
+}{\par\clearpage\endgroup}
+
+% Unframed committee list with repeated headings and normal page breaks.
+% For anonymous reviews, omit reviewer rows instead of inventing reviewer names.
+\newenvironment{hitcommittee}{%
+  \begingroup
+  \setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}%
+  \setlength{\tabcolsep}{3bp}\renewcommand{\arraystretch}{1.2}%
+  \begin{longtable}{@{}%
+    >{\raggedright\arraybackslash}p{\dimexpr .12\linewidth-2\tabcolsep\relax}%
+    >{\raggedright\arraybackslash}p{\dimexpr .12\linewidth-2\tabcolsep\relax}%
+    >{\raggedright\arraybackslash}p{\dimexpr .22\linewidth-2\tabcolsep\relax}%
+    >{\raggedright\arraybackslash}p{\dimexpr .30\linewidth-2\tabcolsep\relax}%
+    >{\raggedright\arraybackslash}p{\dimexpr .24\linewidth-2\tabcolsep\relax}@{}}
+    \bfseries 职务 & \bfseries 姓名 & \bfseries 职称（是否博导） &
+    \bfseries 工作单位 & \bfseries 所在学科\\
+    \endfirsthead
+    \bfseries 职务 & \bfseries 姓名 & \bfseries 职称（是否博导） &
+    \bfseries 工作单位 & \bfseries 所在学科\\
+    \endhead
+    \endfoot
+    \endlastfoot
+}{\end{longtable}\endgroup}
+\newcommand{\hitcommitteerow}[5]{#1 & #2 & #3 & #4 & #5\\}
+\newcommand{\hitreviewerrow}[4]{\hitcommitteerow{评阅人}{#1}{#2}{#3}{#4}}
+
+% Readable accessors preserve the class's current official-form wording. The
+% guide2025 class preset includes the AI-tools marking sentence in originality.
+\newcommand{\hitstudentoriginality}{\hit@declaretext}
+\newcommand{\hitstudentusagepermissions}{\hit@authorizationtext}
+\newcommand{\hitstudentthesistitle}{\hit@ctitle}
+
+% Optional detailed disclosure. It supplements, rather than replaces, the
+% AI-tools sentence in the originality statement. Content is supplied by users.
+\newenvironment{aideclaration}{%
+  \ifhit@openright\cleardoublepage\else\clearpage\fi
+  \ifhit@english
+    \hit@appendix@chapter*{Declaration of AI Tool Use}[Declaration of AI Tool Use]%
+  \else
+    \hit@appendix@chapter*{AI 工具使用说明}[Declaration of AI Tool Use]%
+  \fi
+  \begingroup\normalsize
+}{\par\clearpage\endgroup}
+\endinput

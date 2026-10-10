@@ -1,0 +1,20 @@
+\chapter{模板使用示例}[An Example of Using the Template]
+\section{文档结构}[Document Structure]
+源代码中的封面、正文与后置材料按目录分开。学位类别、版面和匿名开关可独立选择。排版相关背景可参阅公开文献\cite{lamport1994}。会议条目\cite{demoConference}仅用于检验字段输出，作者、题目、会议和页码均为虚构信息。
+\section{图表与数字}[Tables and Numbers]
+\begin{table}[htbp]
+  \bicaption[tab:demo]{}{示例数据}{Table}{Example data}
+  \centering
+  \begin{tabular}{lrr}
+    \toprule
+    项目 & 数量 & 比例 \\
+    \midrule
+    示例一 & \num{12345} & 0.50 \\
+    示例二 & \num{67890} & 0.75 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+表~\ref{tab:demo} 仅展示双语题注、三线表和数字分组。上游已提供相关排版接口，本分支沿用它们。
+\section{长标题与目录换行检查示例章节标题}[A Longer Section Title for Checking Table of Contents Wrapping]
+\subsection{修改自己的论文}[Editing Your Own Thesis]
+在提交前检查英文信息、文献字段、声明正文与签字页。新增选项不能代替学院或图书馆的最终验收。

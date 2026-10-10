@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   test-and-release:
+    if: github.repository == 'hithesis/hithesis'
     runs-on: ubuntu-latest
 
     steps:

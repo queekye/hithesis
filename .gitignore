@@ -83,3 +83,14 @@ hithesis.bst
 /.github/workflows/test_texlive_latest.yml
 test_texlive_latest.yml
 .github/workflows/test_texlive_latest.yml
+
+# Authored student extensions are source files, not generated runtime
+!student/hitthesis-student.cls
+!student/hitstudent-core.sty
+!student/hitlayoutc.sty
+!student/hitstudent-backmatter.sty
+!student/hitwordbackmatter.sty
+!student/gbt7714-numerical-quanjiao.bst
+/_work/
+__pycache__/
+*.pyc

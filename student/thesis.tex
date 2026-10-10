@@ -1,0 +1,32 @@
+% !TeX program = xelatex
+% All people, affiliations and achievements in this starter are fictional.
+% Windows final submission: change fontset=fandol to fontset=windows if the
+% required Chinese fonts are available. guide2025 checks Times New Roman.
+\documentclass[fontset=fandol,type=doctor,campus=harbin,
+  guide2025=true,degreecategory=academic,tocfix=true,
+  layout=upstream,library=true,tocblank=false,splitbibitem=true]{hitthesis-student}
+% Optional: degreecategory=professional, anonymous=true, layout=c,
+% floatlayout=true. See OPTIONS.md before selecting these independently.
+\usepackage{hithesis}
+\usepackage[mode=guide]{hitstudent-backmatter}
+% mode=word selects fixed cells matching the historic Word sample.
+\begin{document}
+\frontmatter
+\input{front/cover}
+\makecover
+\tableofcontents
+% The upstream \tableofcontents already adds the English TOC for doctors.
+\mainmatter
+\input{body/chapter01}
+\bibliographystyle{gbt7714-numerical-quanjiao}
+% Replace the previous line with \bibliographystyle{hithesis} for upstream BST.
+\bibliography{reference}
+\backmatter
+\hitanonymousTF{}{%
+  \input{back/publications}
+  \input{back/resolution-guide}
+  \input{back/authorization-guide}
+  \input{back/acknowledgements}
+  \input{back/ai-tools}
+}
+\end{document}

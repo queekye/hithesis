@@ -1,0 +1,221 @@
+%% Optional student extension for hithesis (https://github.com/hithesis/hithesis).
+%% Copyright (C) 2026 Queekye. Adapted from the author's Word-form back matter.
+%% Uses upstream hithesisbook interfaces, Copyright (C) 2017- its contributors.
+%% This file may be distributed and/or modified under the LaTeX Project Public
+%% License, version 1.3a or (at your option) any later version. This separately
+%% named extension is maintained by Queekye, not the upstream authors.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{hitwordbackmatter}[2026/10/09 v1.0 Checked old-Word back matter]
+\RequirePackage{eso-pic}
+\@ifundefined{hit@appendix@chapter}{%
+  \PackageError{hitwordbackmatter}{Load the hithesisbook class first}%
+    {Use this package with the graduate thesis class.}%
+  \endinput
+}{}
+
+% Compatibility with an older university Word example, measured in bp from
+% its page 20. The framed fixed-coordinate table is NOT the unframed format in
+% the current guide section 1.7. Prefer mode=guide for newly prepared theses.
+% Every cell and the decision are measured BEFORE the page overlay is attached.
+% The table is omitted on any overflow, duplicate row or wrong paper size;
+% a failing build must be fixed, rather than distributed as a final thesis PDF.
+\newsavebox{\hitword@cellbox}
+\newsavebox{\hitword@decisionbox}
+\newsavebox{\hitword@picturebox}
+\newsavebox{\hitword@inspectbox}
+\newsavebox{\hitword@linebox}
+\newsavebox{\hitword@naturallinebox}
+\newif\ifhitword@valid
+\newif\ifhitword@rowallowed
+\newcommand{\hitword@error}[2]{%
+  \global\hitword@validfalse
+  \PackageError{hitwordbackmatter}{#1}{#2}}
+% Cells use centered lines without shrinkable interword spaces. Repack each
+% line at its natural width to also catch unbreakable overlong Latin strings.
+\newcommand{\hitword@checkcelllines}[2]{%
+  \unskip\unpenalty\unkern\unskip\unpenalty\unkern
+  \setbox\hitword@linebox=\lastbox
+  \ifvoid\hitword@linebox\else
+    \setbox\hitword@naturallinebox=\hbox{\unhcopy\hitword@linebox}%
+    \ifdim\wd\hitword@naturallinebox>#1bp
+      \hitword@error{Cell at #2 exceeds #1bp width}%
+        {Insert a sensible line break or use mode=guide.
+         The fixed Word table will not be drawn.}%
+    \fi
+    \hitword@checkcelllines{#1}{#2}%
+  \fi}
+\newcommand{\hitword@entry}[7]{%
+  \setbox\hitword@cellbox=\vbox{%
+    \hsize=#3bp\centering\songti\ziju{0}%
+    \fontsize{#4bp}{#5bp}\selectfont
+    \spaceskip=\fontdimen2\font\xspaceskip=0pt
+    \setlength{\parindent}{0pt}\setlength{\parskip}{0pt}%
+    #7\par}%
+  \setbox\hitword@inspectbox=\vbox{%
+    \unvcopy\hitword@cellbox\hitword@checkcelllines{#3}{(#1, #2)}}%
+  \ifdim\dimexpr\ht\hitword@cellbox+\dp\hitword@cellbox\relax>#6bp
+    \hitword@error{Cell at (#1, #2) exceeds #6bp height}%
+      {Shorten the cell text or use mode=guide with the flowing committee list.
+       The fixed Word table will not be drawn.}%
+  \fi
+  \put(#1,-#2){\makebox(0,0){\copy\hitword@cellbox}}}
+% Legacy public cell interface: all ordinary rows have a checked 21bp limit.
+\newcommand{\hitwordentry}[6]{\hitword@entry{#1}{#2}{#3}{#4}{#5}{21}{#6}}
+\newcommand{\hitwordrow}[5]{%
+  \hitword@rowallowedfalse
+  \@for\hitword@rowcenter:=203.78,225.50,247.22,290.93,312.65,334.37,356.09,377.93,399.65,421.37,443.10\do{%
+    \ifdim#1bp=\hitword@rowcenter bp\relax\hitword@rowallowedtrue\fi}%
+  \ifhitword@rowallowed\else
+    \hitword@error{Unsupported row center #1bp}%
+      {Use the row centers shown in back/resolution-word.tex.
+       Do not add or move fixed rows; use mode=guide for a different committee.}%
+  \fi
+  \@ifundefined{hitword@row@#1}{\@namedef{hitword@row@#1}{used}}{%
+    \hitword@error{Duplicate fixed row at #1bp}%
+      {Each fixed row can be filled only once.}%
+  }%
+  \hitwordentry{184.35}{#1}{52}{10.5}{11}{#2}%
+  \hitwordentry{266.1}{#1}{102}{10.5}{11}{#3}%
+  \hitwordentry{365.35}{#1}{87}{8.5}{9.5}{#4}%
+  \hitwordentry{463.45}{#1}{100}{10.5}{11}{#5}}
+\newcommand{\hitwordhline}[3]{\put(#1,-#2){\rule{#3bp}{0.48bp}}}
+\newcommand{\hitwordvline}[3]{\put(#1,-#2){\rule{0.48bp}{#3bp}}}
+\newcommand{\hitwordresolution}[2]{%
+  \begingroup
+  \global\hitword@validtrue
+  \ifhit@harbin\else
+    \hitword@error{The fixed Word table requires a Chinese Harbin doctor thesis}{Use mode=guide.}%
+  \fi
+  \ifhit@doctor\else
+    \hitword@error{The fixed Word table requires a Chinese Harbin doctor thesis}{Use mode=guide.}%
+  \fi
+  \ifhit@english
+    \hitword@error{The fixed Word table requires a Chinese Harbin doctor thesis}{Use mode=guide.}%
+  \fi
+  \ifdim\paperwidth<209.5mm
+    \hitword@error{The fixed Word table requires A4 paper}{Use mode=guide.}%
+  \fi
+  \ifdim\paperwidth>210.5mm
+    \hitword@error{The fixed Word table requires A4 paper}{Use mode=guide.}%
+  \fi
+  \ifdim\paperheight<296.5mm
+    \hitword@error{The fixed Word table requires A4 paper}{Use mode=guide.}%
+  \fi
+  \ifdim\paperheight>297.5mm
+    \hitword@error{The fixed Word table requires A4 paper}{Use mode=guide.}%
+  \fi
+  \setbox\hitword@decisionbox=\vbox{%
+    \hsize=424.6bp\songti\ziju{0}\fontsize{10.5bp}{13.5bp}\selectfont
+    \setlength{\parindent}{21bp}\setlength{\parskip}{0pt}%
+    #2\par}%
+  \setbox\hitword@inspectbox=\vbox{%
+    \unvcopy\hitword@decisionbox
+    \hitword@checkcelllines{424.6}{decision text}}%
+  % 478bp top to 748.056bp bottom, with at least 10bp clearance.
+  \ifdim\dimexpr\ht\hitword@decisionbox+\dp\hitword@decisionbox\relax>260bp
+    \hitword@error{Decision text exceeds the fixed 260bp space}%
+      {Use mode=guide for a longer decision, or shorten it only with the
+       committee's approval. The fixed Word table will not be drawn.}%
+  \fi
+  \sbox\hitword@picturebox{%
+    \setlength{\unitlength}{1bp}\ziju{0}%
+    \begin{picture}(0,0)
+      \hitwordhline{79.464}{171.38}{436.516}
+      \hitwordhline{155.78}{193.22}{360.20}
+      \hitwordhline{155.78}{214.94}{360.20}
+      \hitwordhline{79.464}{236.66}{436.516}
+      \hitwordhline{79.464}{258.38}{436.516}
+      \hitwordhline{113.18}{280.25}{402.80}
+      \hitwordhline{113.18}{301.97}{402.80}
+      \hitwordhline{155.78}{323.69}{360.20}
+      \hitwordhline{155.78}{345.41}{360.20}
+      \hitwordhline{155.78}{367.25}{360.20}
+      \hitwordhline{155.78}{388.97}{360.20}
+      \hitwordhline{155.78}{410.69}{360.20}
+      \hitwordhline{113.18}{432.41}{402.80}
+      \hitwordhline{79.464}{454.27}{436.516}
+      \hitwordhline{79.464}{748.056}{436.516}
+      \hitwordvline{79.464}{748.056}{577.156}
+      \hitwordvline{515.5}{748.056}{577.156}
+      \hitwordvline{113.18}{454.27}{196.37}
+      \hitwordvline{155.78}{454.27}{283.37}
+      \hitwordvline{212.45}{454.27}{283.37}
+      \hitwordvline{318.79}{454.27}{283.37}
+      \hitwordvline{410.95}{454.27}{283.37}
+      \hitword@entry{117.86}{203.78}{72}{12}{19.44}{64}{\bfseries 评阅人\\（根据实际\\人数填写）}
+      \hitword@entry{184.35}{182.06}{52}{10.5}{11}{21}{\bfseries 姓名}
+      \hitword@entry{266.1}{182.06}{104}{10.5}{11}{21}{\bfseries 职称（是否博导）}
+      \hitword@entry{365.35}{182.06}{87}{10.5}{11}{21}{\bfseries 工作单位}
+      \hitword@entry{463.45}{182.06}{100}{10.5}{11}{21}{\bfseries 所在学科}
+      \hitword@entry{96.56}{356.09}{16}{12}{12}{180}{\bfseries 答辩委员会成员}
+      \hitword@entry{134.72}{269.08}{40}{10.5}{11}{21}{\bfseries 职务}
+      \hitword@entry{184.35}{269.08}{52}{10.5}{11}{21}{\bfseries 姓名}
+      \hitword@entry{266.1}{269.08}{104}{10.5}{11}{21}{\bfseries 职称（是否博导）}
+      \hitword@entry{365.35}{269.08}{87}{10.5}{11}{21}{\bfseries 工作单位}
+      \hitword@entry{463.45}{269.08}{100}{10.5}{11}{21}{\bfseries 所在学科}
+      \hitword@entry{134.72}{290.93}{40}{10.5}{11}{21}{\bfseries 主席}
+      \hitword@entry{134.72}{367.01}{20}{12}{38}{145}{\bfseries 委\\员}
+      \hitword@entry{134.72}{443.10}{40}{10.5}{11}{21}{\bfseries 秘书}
+      #1%
+      \put(85.104,-458.0){\makebox(0,0)[lt]{\parbox{424.6bp}{%
+        \songti\fontsize{12bp}{12bp}\selectfont\bfseries
+        答辩委员会决议（对论文的评语及是否建议授予博士学位等）：}}}
+      \put(85.104,-478.0){\makebox(0,0)[lt]{\copy\hitword@decisionbox}}
+    \end{picture}%
+  }%
+  \ifhitword@valid
+    \AddToShipoutPictureFG*{\AtPageUpperLeft{\copy\hitword@picturebox}}%
+    % Ship out while the picture box's local contents are still in scope.
+    \null\clearpage
+  \fi
+  \endgroup}
+
+% Word-example publication typography; upstream already has pubctr.
+\@ifundefined{c@pubctr}{\newcounter{pubctr}}{}
+\newcommand{\hitwordpubheading}[1]{%
+  \par\vspace{5bp}\noindent
+  {\songti\fontsize{12bp}{19.44bp}\selectfont\bfseries #1}\par\vspace{5bp}}
+\newenvironment{wordpublist}{%
+  \begin{list}{［\arabic{pubctr}］}{%
+    \usecounter{pubctr}\setlength{\leftmargin}{27.6bp}%
+    \setlength{\labelwidth}{27.6bp}\setlength{\labelsep}{0pt}%
+    \setlength{\itemindent}{0pt}\setlength{\topsep}{0pt}%
+    \setlength{\parsep}{0pt}\setlength{\itemsep}{0pt}%
+    \setlength{\partopsep}{0pt}%
+    \renewcommand{\makelabel}[1]{##1\hfil}}%
+  \songti\fontsize{12bp}{19.44bp}\selectfont\let\textit\textnormal
+}{\end{list}}
+
+% Flowing authorization form, retaining the class's declaration wording.
+% Dates are deliberately empty until supplied by the author.
+\newcommand{\hitwordauthorizationdate}[3]{%
+  \def\hitwordauthyear{#1}\def\hitwordauthmonth{#2}\def\hitwordauthday{#3}}
+\hitwordauthorizationdate{}{}{}
+\newcommand{\hitwordauthdate}{%
+  日期：\makebox[2em][l]{\hitwordauthyear}\hspace{0.5em}年\hspace{0.5em}%
+  \makebox[1em][l]{\hitwordauthmonth}月\hspace{0.5em}%
+  \makebox[1em][l]{\hitwordauthday}日}
+\newcommand{\hitwordauthsignature}[1]{%
+  \par\noindent\hspace*{6em}#1签名：\hfill\hitwordauthdate\hspace*{2em}\par}
+\newcommand{\hitwordauthheading}[1]{%
+  \par{\centering\heiti\fontsize{15bp}{19.44bp}\selectfont #1\par}%
+  \vspace{19.2bp}}
+\newcommand{\hitwordthesistitle}{\hit@ctitle}
+\newcommand{\hitwordauthorization}[2]{%
+  \ifhit@openright\cleardoublepage\else\clearpage\fi
+  \begingroup
+    \linespread{1}\ziju{0}\rmfamily\songti\fontsize{12bp}{19.44bp}\selectfont
+    \setlength{\parindent}{24bp}\setlength{\parskip}{0pt}%
+    \xeCJKsetup{PunctStyle=plain,CJKglue=\hskip0bp plus1bp minus1bp}%
+    \hit@appendix@chapter*{\hit@authorization@ctitle}[\hit@authorization@etitle]%
+    \thispagestyle{hit@headings}%
+    \hitwordauthheading{\hit@declarename}%
+    #1\par
+    \vspace{17.3bp}\hitwordauthsignature{作者}%
+    \vspace{43.2bp}\hitwordauthheading{\hit@authorizationtitle}%
+    #2\par
+    \vspace{34.46bp}\hitwordauthsignature{作者}%
+    \vspace{17.28bp}\hitwordauthsignature{导师}%
+    \clearpage
+  \endgroup}
+\endinput

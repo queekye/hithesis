@@ -1,0 +1,146 @@
+[
+  {
+    "case": "starter-word",
+    "passed": true,
+    "detail": "14 pages; text and bibliography checks passed",
+    "seconds": 21.44
+  },
+  {
+    "case": "starter-doctor-academic",
+    "passed": true,
+    "detail": "14 pages; text and bibliography checks passed",
+    "seconds": 21.36
+  },
+  {
+    "case": "starter-master-academic",
+    "passed": true,
+    "detail": "13 pages; text and bibliography checks passed",
+    "seconds": 21.47
+  },
+  {
+    "case": "starter-master-professional",
+    "passed": true,
+    "detail": "13 pages; text and bibliography checks passed",
+    "seconds": 21.88
+  },
+  {
+    "case": "starter-doctor-professional",
+    "passed": true,
+    "detail": "14 pages; text and bibliography checks passed",
+    "seconds": 21.19
+  },
+  {
+    "case": "starter-anonymous",
+    "passed": true,
+    "detail": "9 pages; text and bibliography checks passed",
+    "seconds": 20.55
+  },
+  {
+    "case": "starter-layout-c",
+    "passed": true,
+    "detail": "14 pages; text and bibliography checks passed",
+    "seconds": 21.3
+  },
+  {
+    "case": "starter-word-c",
+    "passed": true,
+    "detail": "14 pages; text and bibliography checks passed",
+    "seconds": 21.44
+  },
+  {
+    "case": "word-reject-cell-width",
+    "passed": true,
+    "detail": "rejected with exceeds 52bp width",
+    "seconds": 4.75
+  },
+  {
+    "case": "word-reject-cell-height",
+    "passed": true,
+    "detail": "rejected with exceeds 21bp height",
+    "seconds": 4.5
+  },
+  {
+    "case": "word-reject-decision-width",
+    "passed": true,
+    "detail": "rejected with exceeds 424.6bp width",
+    "seconds": 4.53
+  },
+  {
+    "case": "word-reject-decision-height",
+    "passed": true,
+    "detail": "rejected with Decision text exceeds the fixed 260bp space",
+    "seconds": 4.5
+  },
+  {
+    "case": "word-reject-duplicate-row",
+    "passed": true,
+    "detail": "rejected with Duplicate fixed row",
+    "seconds": 4.73
+  },
+  {
+    "case": "word-reject-non-a4",
+    "passed": true,
+    "detail": "rejected with requires A4 paper",
+    "seconds": 4.5
+  },
+  {
+    "case": "word-reject-master-scope",
+    "passed": true,
+    "detail": "rejected with requires a Chinese Harbin doctor thesis",
+    "seconds": 4.27
+  },
+  {
+    "case": "upstream-default-pixels",
+    "passed": true,
+    "detail": "14 pages are byte-identical at 100 dpi",
+    "seconds": 32.97
+  },
+  {
+    "case": "core-default",
+    "passed": true,
+    "detail": "passed",
+    "seconds": 16.28
+  },
+  {
+    "case": "core-flags-standalone",
+    "passed": true,
+    "detail": "passed",
+    "seconds": 16.84
+  },
+  {
+    "case": "core-guide-academic",
+    "passed": true,
+    "detail": "passed",
+    "seconds": 17.44
+  },
+  {
+    "case": "core-guide-professional-anonymous",
+    "passed": true,
+    "detail": "passed",
+    "seconds": 20.2
+  },
+  {
+    "case": "core-invalid-degreecategory",
+    "passed": true,
+    "detail": "rejected with Invalid degreecategory",
+    "seconds": 4.03
+  },
+  {
+    "case": "core-invalid-layout",
+    "passed": true,
+    "detail": "rejected with Invalid layout",
+    "seconds": 3.95
+  },
+  {
+    "case": "core-unsupported-campus",
+    "passed": true,
+    "detail": "rejected with requires Harbin master or doctor",
+    "seconds": 3.92
+  },
+  {
+    "case": "guide-continuation",
+    "passed": true,
+    "detail": "8 pages; 80 rows and 320 sentences retained",
+    "seconds": 15.77
+  }
+]

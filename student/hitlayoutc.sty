@@ -1,0 +1,50 @@
+%% Optional student extension for hithesis (https://github.com/hithesis/hithesis).
+%% Copyright (C) 2026 Queekye. Adapted from the author's dissertation layout C.
+%% This file may be distributed and/or modified under the LaTeX Project Public
+%% License, version 1.3a or (at your option) any later version. It is a separately
+%% named maintained extension; the upstream authors do not maintain this file.
+%% See the repository's provenance and license notes for the upstream terms.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{hitlayoutc}[2026/10/09 v1.0 Optional Harbin graduate layout C]
+
+% These exact measurements are a project choice derived from the HIT guide and
+% Word example, not the university's only approved layout. Nothing is changed
+% unless this package (or the student's layout=c class option) is requested.
+\@ifundefined{ifhit@harbin}{%
+  \PackageError{hitlayoutc}{Load the hithesisbook class first}%
+    {This extension requires the hithesisbook graduate thesis class.}%
+  \endinput
+}{}
+\newif\ifhitlayoutc@allowed
+\hitlayoutc@allowedfalse
+\ifhit@harbin
+  \ifhit@master\hitlayoutc@allowedtrue\fi
+  \ifhit@doctor\hitlayoutc@allowedtrue\fi
+\fi
+\ifhit@english\hitlayoutc@allowedfalse\fi
+\@ifclassloaded{hithesisbook}{}{\hitlayoutc@allowedfalse}
+\ifhitlayoutc@allowed
+  \RequirePackage{geometry}
+  % Text area excludes the running header and page number.
+  \geometry{
+    text={150mm,229mm},
+    top=34mm,
+    left=30mm,
+    headheight=5mm,
+    headsep=1mm,
+    footskip=5.1mm
+  }
+  % Fixed body baseline; preserve upstream display-math spacing.
+  \renewcommand\normalsize{%
+    \@setfontsize\normalsize{12bp}{19.55bp}%
+    \abovedisplayskip=8pt
+    \abovedisplayshortskip=8pt
+    \belowdisplayskip=8pt
+    \belowdisplayshortskip=8pt
+  }
+\else
+  \PackageError{hitlayoutc}{Layout C is outside its supported scope}%
+    {Use a Chinese Harbin master or doctor thesis, without opening or midterm.
+     Remove layout=c (or this package) for other document types.}%
+\fi
+\endinput

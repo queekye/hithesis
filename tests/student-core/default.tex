@@ -1,0 +1,36 @@
+%% Regression fixture: fully upstream layout and no hidden-placeholder fix.
+\documentclass[type=doctor,campus=harbin,fontset=fandol,fixhidden=false]{hitthesis-student}
+\makeatletter
+\ifbool{hitstudent@guide2025}{\errmessage{Unexpected guide preset}}{}
+\ifhitstudent@explicitdegree\errmessage{Unexpected explicit degree}\fi
+\ifhitstudent@anonymous\errmessage{Unexpected anonymous mode}\fi
+\makeatother
+\hitsetup{
+  ctitle={跨模态证据建模的合成论文示例},
+  ctitlecover={跨模态证据建模的合成论文示例},
+  etitle={A Synthetic Thesis Example on Cross-modal Evidence Modelling},
+  cxueke={工学}, exueke={Engineering},
+  cauthor={合成作者}, eauthor={Synthetic Author},
+  csupervisor={合成导师教授}, esupervisor={Professor Synthetic Supervisor},
+  cassosupervisor={合成副导师教授}, eassosupervisor={Professor Synthetic Associate},
+  ccosupervisor={合成行业导师高级工程师}, ecosupervisor={Synthetic Industry Supervisor},
+  caffil={合成计算机科学与技术学院}, eaffil={Synthetic School of Computer Science and Technology},
+  csubject={合成计算机科学与技术学科}, esubject={Synthetic Computer Science and Technology},
+  cdate={2026 年 10 月}, edate={October, 2026},
+  natclassifiedindex={TP391}, intclassifiedindex={004}, statesecrets={公开},
+  cstudentid={SYNTHETIC-ID}, cstudenttype={学术学位}, estudenttype={Academic Degree},
+  ckeywords={合成示例,模板验证}, ekeywords={synthetic example,template validation}
+}
+\begin{cabstract}这是用于模板回归验证的虚构摘要。\end{cabstract}
+\begin{eabstract}This fictional abstract is solely for template regression checks.\end{eabstract}
+\begin{document}
+\frontmatter
+\makecover
+\tableofcontents
+\mainmatter
+\chapter{合成长章标题，用于核验章目录悬挂宽度在节条目与章条目交替之后仍然正确}[Synthetic chapter for TOC hanging-width checks]
+\section{合成小节}[Synthetic section]
+本示例不包含真实论文、身份信息或评审材料。
+\chapter{合成第二章}[Second synthetic chapter]
+\hitanonymousTF{本模式省略身份相关后置材料。}{\begin{publication}合成作者的虚构成果条目。\end{publication}\authorization}
+\end{document}
