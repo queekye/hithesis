@@ -12,7 +12,7 @@
 
 ```powershell
 .\scripts\prepare-student-windows.cmd
-.\scriptsuild-student-windows.cmd
+.\scripts\build-student-windows.cmd
 ```
 
 发行压缩包已生成必要类文件，按README使用构建脚本。Linux/macOS源码先 `bash scripts/prepare-student.sh`，再在 `student/` 顺序执行 `xelatex thesis.tex`、`bibtex thesis`、`xelatex thesis.tex`、`xelatex thesis.tex`。云编辑器使用学生发行目录，主文件thesis.tex，编译器XeLaTeX。
